@@ -64,3 +64,48 @@ video.addEventListener("play", async () => {
 
     }, 1000);
 });
+
+let knownFaces = [];
+
+document.getElementById("register").onclick = async () => {
+    const detection = await faceapi
+        .detectSingleFace(video, new faceapi.TinyFaceDetectorOptions())
+        .withFaceLandmarks()
+        .withFaceDescriptor()
+
+        if (!detection) {
+            result.innerHTML = "No face to register";
+            return
+        }
+
+        knownFaces.push(detection.descriptor);
+        result.innerText = "Face registered!"
+
+}
+
+
+document.getElementById("check").onclick = async () => {
+
+    const detection = await faceapi
+        .detectSingleFace(video, new faceapi.TinyFaceDetectorOptions())
+        .withFaceLandmarks()
+        .withFaceDescriptor();
+
+        if(!detection) {
+            result.innerHTML = "No face detected";
+            return;
+        }
+
+        let matchFound = false;
+
+        for (let face of knownFaces) {
+            const distance = faceapi.euclideanDistance(face, detection.descriptor);
+
+                if (distance < 0.5) {
+                    matchFound = true
+                    break
+                }
+        }
+
+        result.innerHTML = matchFound ? "Match found" : "Unknown person"
+}
